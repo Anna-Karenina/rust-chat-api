@@ -4,7 +4,13 @@ use rocket::{
     response::{Responder, Response},
     serde::json::Value,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Debug, Deserialize, Clone)]
+pub struct ErrorResponse {
+    pub message: String,
+    pub trace: String,
+}
 
 #[derive(Debug, Serialize)]
 pub struct ApiResponse {

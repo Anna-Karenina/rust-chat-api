@@ -1,6 +1,7 @@
 use crate::internal::{
-    api_response::ApiResponse,
+    api_response::{ApiResponse, ErrorResponse},
     cache::{CacheError, CacheService},
+    token_guard::TokenGuard,
 };
 use rocket::{
     get,
@@ -13,7 +14,7 @@ use rocket::{
 use super::models::addressee::{Addressee, CreateAddresseeDTO};
 
 #[post("/addressee", format = "json", data = "<value>")]
-pub async fn set_value(
+pub async fn create_addressee(
     value: Json<CreateAddresseeDTO>,
     cache_service: &State<CacheService>,
 ) -> Result<Json<ApiResponse>, CacheError> {
@@ -33,14 +34,18 @@ pub async fn set_value(
 }
 
 #[get("/addressee/<key>")]
-pub async fn get_value(
-    key: String,
+pub async fn get_addressee(
+    key: &str,
     cache_service: &State<CacheService>,
-) -> Result<Json<ApiResponse>, CacheError> {
-    let addressee: Addressee = cache_service
-        .get_value(&key)
-        .await
-        .map_err(|e| CacheError::from(e))?;
+    _tg: TokenGuard,
+) -> Result<Json<ApiResponse>, Json<ErrorResponse>> {
+    let addressee: Addressee = cache_service.get_value(&key).await.map_err(|e| {
+        let err = ErrorResponse {
+            message: "Fail".to_string(),
+            trace: CacheError::from(e).to_string(),
+        };
+        Json(err)
+    })?;
     Ok(Json(ApiResponse {
         data: json!(addressee),
         status: Status::Ok,

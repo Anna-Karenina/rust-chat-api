@@ -28,10 +28,7 @@ impl CacheService {
         Ok(())
     }
 
-    pub async fn get_value<T: DeserializeOwned>(
-        &self,
-        key: &str,
-    ) -> Result<T, Box<dyn StdError + Send + Sync>> {
+    pub async fn get_value<T: DeserializeOwned>(&self, key: &str) -> Result<T, CacheError> {
         let mut con = self.client.get_multiplexed_tokio_connection().await?;
         let value: String = con.get(key).await?;
         let deserialized: T = serde_json::from_str(&value)?;

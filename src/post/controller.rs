@@ -13,11 +13,7 @@ use super::models::ws_message::{WebSocketMessage, WebSocketMessageType};
 
 static USER_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
-#[post(
-    "/post-box/create",
-    format = "application/json",
-    data = "<post_box_dto>"
-)]
+#[post("/create", format = "application/json", data = "<post_box_dto>")]
 pub async fn post_box_create(
     post_box_dto: Json<CreatePostBoxDTO<'_>>,
     state: &State<Post>,
@@ -29,22 +25,22 @@ pub async fn post_box_create(
     format!("chat id: {}", chat_id)
 }
 
-#[get("/post-box/<post_box_id>/ws")]
+#[get("/<post_box_id>/ws")]
 pub fn post_box<'r>(
     post_box_id: &str,
     ws: WebSocket,
     state: &'r State<ChatRoom>,
     cookies: &CookieJar<'_>,
 ) -> Result<Channel<'r>, Status> {
-    let addressee_cookies = cookies.get_private("addressee");
+    let addressee_cookies = cookies.get_private("a");
 
-    let addressee = if let Some(addressee_cookies) = addressee_cookies {
+    let addressee_res = if let Some(addressee_cookies) = addressee_cookies {
         from_str::<Addressee>(&addressee_cookies.value()).ok()
     } else {
-        return Err(Status::BadRequest);
+        return Err(Status::NotFound);
     };
 
-    let addressee = match addressee {
+    let addressee = match addressee_res {
         Some(addressee) => addressee,
         None => {
             return Err(Status::BadRequest);
