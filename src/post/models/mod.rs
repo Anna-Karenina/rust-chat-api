@@ -1,3 +1,4 @@
+pub mod chat_room;
 pub mod ws_message;
 
 pub use ws_message::ChatMessage;

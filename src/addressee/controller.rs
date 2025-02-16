@@ -1,4 +1,3 @@
-use super::models::addressee::{Addressee, CreateAddresseeDTO};
 use crate::internal::{
     api_response::ApiResponse,
     cache::{CacheError, CacheService},
@@ -10,6 +9,8 @@ use rocket::{
     serde::json::{json, Json},
     State,
 };
+
+use super::models::addressee::{Addressee, CreateAddresseeDTO};
 
 #[post("/addressee", format = "json", data = "<value>")]
 pub async fn set_value(
