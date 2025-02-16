@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 use api::models::{ChatMessage, WebSocketMessage, WebSocketMessageType};
 use chrono::Utc;
 
@@ -9,6 +10,18 @@ use serde_json::{from_str, json};
 use std::{
     collections::HashMap,
     sync::atomic::{AtomicUsize, Ordering},
+=======
+pub mod addressee;
+pub mod internal;
+pub mod post;
+
+use internal::cache::CacheService;
+
+use addressee::controller::{get_value, set_value};
+use post::{
+    controller::{post_box, post_box_create},
+    models::chat_room::{ChatRoom, Post},
+>>>>>>> Stashed changes
 };
 
 static USER_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
@@ -174,10 +187,23 @@ async fn handle_incoming_message(
 }
 
 #[rocket::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let redis_url = "redis://127.0.0.1/";
+    let cache_service = CacheService::new(redis_url).expect("Failed to create CacheService");
+
     let _ = rocket::build()
+<<<<<<< Updated upstream
         .mount("/", rocket::routes![chat])
+=======
+        .manage(cache_service)
+        .manage(Post::default())
+>>>>>>> Stashed changes
         .manage(ChatRoom::default())
+        .mount(
+            "/",
+            rocket::routes![post_box, post_box_create, get_value, set_value],
+        )
         .launch()
         .await;
+    Ok(())
 }
